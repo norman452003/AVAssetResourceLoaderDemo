@@ -7,8 +7,12 @@
 //
 
 #import "ViewController.h"
+#import "AVPlayerTool.h"
+#import "GXPlayerView.h"
+@import AVFoundation;
 
 @interface ViewController ()
+
 
 @end
 
@@ -16,13 +20,25 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    
+    [self setUpPlayer];
 }
+
+- (void)setUpPlayer{
+    
+    [[AVPlayerTool sharedPlayerTool] playWithURL:[NSURL URLWithString:@"https://mvvideo5.meitudata.com/56ea0e90d6cb2653.mp4"]];
+    GXPlayerView *playerView = [[GXPlayerView alloc] initWithFrame:self.view.bounds];
+    [playerView setPlayer:[AVPlayerTool sharedPlayerTool].player];
+    [self.view addSubview:playerView];
+    
+    
+    [[AVPlayerTool sharedPlayerTool].player play];
+}
+
 
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 

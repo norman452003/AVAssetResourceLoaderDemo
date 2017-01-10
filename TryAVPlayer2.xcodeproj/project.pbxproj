@@ -13,6 +13,9 @@
 		D286A3431E2482270044A2D9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D286A3411E2482270044A2D9 /* Main.storyboard */; };
 		D286A3451E2482270044A2D9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D286A3441E2482270044A2D9 /* Assets.xcassets */; };
 		D286A3481E2482270044A2D9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D286A3461E2482270044A2D9 /* LaunchScreen.storyboard */; };
+		D286A3521E2483CB0044A2D9 /* AVPlayerTool.m in Sources */ = {isa = PBXBuildFile; fileRef = D286A3511E2483CB0044A2D9 /* AVPlayerTool.m */; };
+		D286A3551E24873A0044A2D9 /* GXVideoPlayerTask.m in Sources */ = {isa = PBXBuildFile; fileRef = D286A3541E24873A0044A2D9 /* GXVideoPlayerTask.m */; };
+		D286A3581E2489530044A2D9 /* GXPlayerView.m in Sources */ = {isa = PBXBuildFile; fileRef = D286A3571E2489530044A2D9 /* GXPlayerView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +29,12 @@
 		D286A3441E2482270044A2D9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D286A3471E2482270044A2D9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D286A3491E2482270044A2D9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D286A3501E2483CB0044A2D9 /* AVPlayerTool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVPlayerTool.h; sourceTree = "<group>"; };
+		D286A3511E2483CB0044A2D9 /* AVPlayerTool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVPlayerTool.m; sourceTree = "<group>"; };
+		D286A3531E24873A0044A2D9 /* GXVideoPlayerTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GXVideoPlayerTask.h; sourceTree = "<group>"; };
+		D286A3541E24873A0044A2D9 /* GXVideoPlayerTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GXVideoPlayerTask.m; sourceTree = "<group>"; };
+		D286A3561E2489530044A2D9 /* GXPlayerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GXPlayerView.h; sourceTree = "<group>"; };
+		D286A3571E2489530044A2D9 /* GXPlayerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GXPlayerView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +67,7 @@
 		D286A3371E2482270044A2D9 /* TryAVPlayer2 */ = {
 			isa = PBXGroup;
 			children = (
+				D286A34F1E2483BB0044A2D9 /* PlayerTool */,
 				D286A33B1E2482270044A2D9 /* AppDelegate.h */,
 				D286A33C1E2482270044A2D9 /* AppDelegate.m */,
 				D286A33E1E2482270044A2D9 /* ViewController.h */,
@@ -77,6 +87,19 @@
 				D286A3391E2482270044A2D9 /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		D286A34F1E2483BB0044A2D9 /* PlayerTool */ = {
+			isa = PBXGroup;
+			children = (
+				D286A3501E2483CB0044A2D9 /* AVPlayerTool.h */,
+				D286A3511E2483CB0044A2D9 /* AVPlayerTool.m */,
+				D286A3531E24873A0044A2D9 /* GXVideoPlayerTask.h */,
+				D286A3541E24873A0044A2D9 /* GXVideoPlayerTask.m */,
+				D286A3561E2489530044A2D9 /* GXPlayerView.h */,
+				D286A3571E2489530044A2D9 /* GXPlayerView.m */,
+			);
+			path = PlayerTool;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -150,9 +173,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D286A3551E24873A0044A2D9 /* GXVideoPlayerTask.m in Sources */,
 				D286A3401E2482270044A2D9 /* ViewController.m in Sources */,
 				D286A33D1E2482270044A2D9 /* AppDelegate.m in Sources */,
 				D286A33A1E2482270044A2D9 /* main.m in Sources */,
+				D286A3581E2489530044A2D9 /* GXPlayerView.m in Sources */,
+				D286A3521E2483CB0044A2D9 /* AVPlayerTool.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
