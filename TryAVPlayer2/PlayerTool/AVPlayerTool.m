@@ -40,7 +40,8 @@
     self.player = [AVPlayer playerWithPlayerItem:item];
     NSString *document = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
 //    NSString *document = NSTemporaryDirectory();
-    _videoPath = [document stringByAppendingPathComponent:self.originalURL.absoluteString.lastPathComponent];
+//    _videoPath = [document stringByAppendingPathComponent:self.originalURL.absoluteString.lastPathComponent];
+    _videoPath = [document stringByAppendingPathComponent:@"temp.mp4"];
     
 }
 

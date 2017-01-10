@@ -141,9 +141,9 @@
         _isFinishLoad = YES;
         
         //这里自己写需要保存数据的路径
-//        NSString *document = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
-        NSString *cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"GX"];
-        cachePath = [cachePath stringByAppendingPathComponent:self.url.absoluteString.lastPathComponent];
+        NSString *document = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
+//        NSString *cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"GX"];
+        NSString *cachePath = [document stringByAppendingPathComponent:@"保持数据.mp4"];
         
         BOOL isSuccess = [[NSFileManager defaultManager] copyItemAtPath:_tempPath toPath:cachePath error:nil];
         if (isSuccess) {
