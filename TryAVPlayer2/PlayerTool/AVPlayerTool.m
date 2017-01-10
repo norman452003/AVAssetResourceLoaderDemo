@@ -38,11 +38,8 @@
     [asset.resourceLoader setDelegate:self queue:dispatch_get_main_queue()];
     AVPlayerItem *item = [AVPlayerItem playerItemWithAsset:asset];
     self.player = [AVPlayer playerWithPlayerItem:item];
-    NSString *document = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
-//    NSString *document = NSTemporaryDirectory();
-//    _videoPath = [document stringByAppendingPathComponent:self.originalURL.absoluteString.lastPathComponent];
+    NSString *document = NSTemporaryDirectory();
     _videoPath = [document stringByAppendingPathComponent:self.originalURL.absoluteString.lastPathComponent];
-    
 }
 
 - (NSURL *)addSchemeToURL:(NSURL *)url{
@@ -52,20 +49,21 @@
 
 #pragma mark - resourceLoaderDelegate
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest{
+    NSLog(@"loadingRequestStart ====== %lld",loadingRequest.dataRequest.currentOffset);
     [self.pendingArray addObject:loadingRequest];
     [self dealWithLoadingRequest:loadingRequest];
     return YES;
 }
 
 - (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest{
+    NSLog(@"loadingRequestCancel ===== %lld",loadingRequest.dataRequest.currentOffset);
     [self.pendingArray removeObject:loadingRequest];
 }
 
-- (void)dealWithLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
-{
-    NSURL *interceptedURL = [loadingRequest.request URL];
+- (void)dealWithLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest{
+    
     NSRange range = NSMakeRange((NSUInteger)loadingRequest.dataRequest.currentOffset, NSUIntegerMax);
-    NSLog(@"1======%@",NSStringFromRange(range));
+    NSLog(@"dealWithRequest downloadingOffset = %ld",self.task.downLoadingOffset);
     if (self.task.downLoadingOffset > 0) {
         [self processPendingRequests];
     }
@@ -79,7 +77,6 @@
         if (self.task.offset + self.task.downLoadingOffset + 1024 * 300 < range.location ||
             // 如果往回拖也重新请求
             range.location < self.task.offset) {
-            NSLog(@"2======%@",NSStringFromRange(range));
             [self.task setUrl:self.originalURL offset:range.location];
         }
     }
@@ -95,7 +92,7 @@
         
         BOOL didRespondCompletely = [self respondWithDataForRequest:loadingRequest.dataRequest]; //判断此次请求的数据是否处理完全
         if (didRespondCompletely) {
-            NSLog(@"%@",loadingRequest);
+            NSLog(@"loadingRequest finish%lld",loadingRequest.dataRequest.currentOffset);
             
             [requestsCompleted addObject:loadingRequest];  //如果完整，把此次请求放进 请求完成的数组
             [loadingRequest finishLoading];

@@ -28,12 +28,11 @@
 @end
 
 @implementation GXVideoPlayerTask
-- (instancetype)initWithURL:(NSURL *)url
-{
+- (instancetype)initWithURL:(NSURL *)url{
     self = [super init];
     if (self) {
         _taskArr = [NSMutableArray array];
-        NSString *document = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
+        NSString *document = NSTemporaryDirectory();
         _tempPath =  [document stringByAppendingPathComponent:url.absoluteString.lastPathComponent];
         if ([[NSFileManager defaultManager] fileExistsAtPath:_tempPath]) {
             [[NSFileManager defaultManager] removeItemAtPath:_tempPath error:nil];
@@ -47,8 +46,7 @@
     return self;
 }
 
-- (void)setUrl:(NSURL *)url offset:(NSUInteger)offset
-{
+- (void)setUrl:(NSURL *)url offset:(NSUInteger)offset{
     _url = url;
     _offset = offset;
     
@@ -75,8 +73,7 @@
 
 
 
-- (void)cancel
-{
+- (void)cancel{
     [self.connection cancel];
     
 }
@@ -85,8 +82,7 @@
 #pragma mark -  NSURLConnection Delegate Methods
 
 
-- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
-{
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response{
     _isFinishLoad = NO;
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
     
@@ -120,8 +116,7 @@
     
 }
 
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
-{
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data{
     
     [self.fileHandle seekToEndOfFile];
     
@@ -139,18 +134,6 @@
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection{
     if (self.taskArr.count < 2) {
         _isFinishLoad = YES;
-        
-        //这里自己写需要保存数据的路径
-//        NSString *document = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
-//        NSString *cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"GX"];
-//        NSString *cachePath = [document stringByAppendingPathComponent:@"保持数据.mp4"];
-        
-//        BOOL isSuccess = [[NSFileManager defaultManager] copyItemAtPath:_tempPath toPath:cachePath error:nil];
-//        if (isSuccess) {
-//            NSLog(@"rename success");
-//        }else{
-//            NSLog(@"rename fail");
-//        }
     }
     
     if ([self.delegate respondsToSelector:@selector(didFinishLoadingWithTask:)]) {

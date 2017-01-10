@@ -31,7 +31,6 @@
     [playerView setPlayer:[AVPlayerTool sharedPlayerTool].player];
     [self.view addSubview:playerView];
     
-    
     [[AVPlayerTool sharedPlayerTool].player play];
 }
 
