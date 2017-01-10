@@ -13,9 +13,13 @@
 @interface AVPlayerTool () <AVAssetResourceLoaderDelegate,GXVideoPlayerTaskDelegate>
 @property (nonatomic, strong ,readwrite) AVPlayer *player;
 @property (nonatomic, strong) NSURL *originalURL;
+@property (nonatomic, strong) NSURL *schemeURL;
+
 @property (nonatomic, strong) NSMutableArray *pendingArray;
 @property (nonatomic, copy  ) NSString       *videoPath;
 @property (nonatomic, strong) GXVideoPlayerTask *task;
+@property (nonatomic, strong) AVPlayerItem *item;
+
 @end
 
 @implementation AVPlayerTool
@@ -33,43 +37,57 @@
     
     self.pendingArray = [NSMutableArray array];
     self.originalURL = url;
-    NSURL *schemeURL = [self addSchemeToURL:url];
-    AVURLAsset *asset = [AVURLAsset assetWithURL:schemeURL];
+    self.schemeURL = [self addSchemeToURL:url];
+    AVURLAsset *asset = [AVURLAsset assetWithURL:self.schemeURL];
     [asset.resourceLoader setDelegate:self queue:dispatch_get_main_queue()];
-    AVPlayerItem *item = [AVPlayerItem playerItemWithAsset:asset];
-    self.player = [AVPlayer playerWithPlayerItem:item];
+    self.item = [AVPlayerItem playerItemWithAsset:asset];
+    self.player = [AVPlayer playerWithPlayerItem:self.item];
     NSString *document = NSTemporaryDirectory();
     _videoPath = [document stringByAppendingPathComponent:self.originalURL.absoluteString.lastPathComponent];
+    [self.item addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:NULL];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
+    if (object == self.item) {
+        if (self.item.status == AVPlayerItemStatusReadyToPlay) {
+            NSLog(@"ready to play");
+            [self.player play];
+        }else{
+            
+            NSLog(@"pause");
+            [self.player pause];
+        }
+    }
 }
 
 - (NSURL *)addSchemeToURL:(NSURL *)url{
-    NSString *urlStr = [NSString stringWithFormat:@"head:%@",url];
-    return [NSURL URLWithString:urlStr];
+    NSURLComponents *components = [[NSURLComponents alloc] initWithURL:url resolvingAgainstBaseURL:NO];
+    components.scheme = @"streaming";
+    return [components URL];
 }
 
 #pragma mark - resourceLoaderDelegate
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest{
-    NSLog(@"loadingRequestStart ====== %lld",loadingRequest.dataRequest.currentOffset);
     [self.pendingArray addObject:loadingRequest];
     [self dealWithLoadingRequest:loadingRequest];
     return YES;
 }
 
 - (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest{
-    NSLog(@"loadingRequestCancel ===== %lld",loadingRequest.dataRequest.currentOffset);
+//    NSLog(@"loadingRequestCancel ===== %lld",loadingRequest.dataRequest.currentOffset);
     [self.pendingArray removeObject:loadingRequest];
 }
 
 - (void)dealWithLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest{
     
     NSRange range = NSMakeRange((NSUInteger)loadingRequest.dataRequest.currentOffset, NSUIntegerMax);
-    NSLog(@"dealWithRequest downloadingOffset = %ld",self.task.downLoadingOffset);
+//    NSLog(@"dealWithRequest downloadingOffset = %ld",self.task.downLoadingOffset);
     if (self.task.downLoadingOffset > 0) {
         [self processPendingRequests];
     }
     
     if (!self.task) {
-        self.task = [[GXVideoPlayerTask alloc] initWithURL:_originalURL];
+        self.task = [[GXVideoPlayerTask alloc] initWithURL:self.schemeURL];
         self.task.delegate = self;
         [self.task setUrl:self.originalURL offset:0];
     } else {
@@ -92,11 +110,10 @@
         
         BOOL didRespondCompletely = [self respondWithDataForRequest:loadingRequest.dataRequest]; //判断此次请求的数据是否处理完全
         if (didRespondCompletely) {
-            NSLog(@"loadingRequest finish%lld",loadingRequest.dataRequest.currentOffset);
+//            NSLog(@"loadingRequest finish%lld",loadingRequest.dataRequest.currentOffset);
             
             [requestsCompleted addObject:loadingRequest];  //如果完整，把此次请求放进 请求完成的数组
             [loadingRequest finishLoading];
-            
         }
     }
     
@@ -149,6 +166,10 @@
 
 - (void)didReceiveVideoDataWithTask:(GXVideoPlayerTask *)task{
     [self processPendingRequests];
+}
+
+- (void)didFinishLoadingWithTask:(GXVideoPlayerTask *)task{
+
 }
 
 @end

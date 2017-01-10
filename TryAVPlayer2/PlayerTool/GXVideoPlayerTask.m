@@ -10,20 +10,20 @@
 
 @interface GXVideoPlayerTask ()
 
-@property (nonatomic, strong) NSURL           *url;
-@property (nonatomic        ) NSUInteger      offset;
+@property (nonatomic, strong) NSURL *url;
+@property (nonatomic) NSUInteger offset;
 
-@property (nonatomic        ) NSUInteger      videoLength;
-@property (nonatomic, strong) NSString        *mimeType;
+@property (nonatomic) NSUInteger videoLength;
+@property (nonatomic, strong) NSString *mimeType;
 
 @property (nonatomic, strong) NSURLConnection *connection;
-@property (nonatomic, strong) NSMutableArray  *taskArr;
+@property (nonatomic, strong) NSMutableArray *taskArr;
 
-@property (nonatomic, assign) NSUInteger      downLoadingOffset;
-@property (nonatomic, assign) BOOL            once;
+@property (nonatomic, assign) NSUInteger downLoadingOffset;
+@property (nonatomic, assign) BOOL once;
 
-@property (nonatomic, strong) NSFileHandle    *fileHandle;
-@property (nonatomic, strong) NSString        *tempPath;
+@property (nonatomic, strong) NSFileHandle *fileHandle;
+@property (nonatomic, strong) NSString *tempPath;
 
 @end
 
@@ -58,7 +58,10 @@
     
     _downLoadingOffset = 0;
     
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:20.0];
+    NSURLComponents *actualURLComponents = [[NSURLComponents alloc] initWithURL:url resolvingAgainstBaseURL:NO];
+    actualURLComponents.scheme = @"http";
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[actualURLComponents URL] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:20.0];
     
     if (offset > 0 && self.videoLength > 0) {
         [request addValue:[NSString stringWithFormat:@"bytes=%ld-%ld",(unsigned long)offset, (unsigned long)self.videoLength - 1] forHTTPHeaderField:@"Range"];
@@ -166,10 +169,11 @@
 - (void)continueLoading
 {
     _once = YES;
-//    NSURLComponents *actualURLComponents = [[NSURLComponents alloc] initWithURL:_url resolvingAgainstBaseURL:NO];
-//    actualURLComponents.scheme = @"http";
     
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:_url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:20.0];
+    
+    NSURLComponents *actualURLComponents = [[NSURLComponents alloc] initWithURL:_url resolvingAgainstBaseURL:NO];
+    actualURLComponents.scheme = @"http";
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[actualURLComponents URL] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:20.0];
     
     [request addValue:[NSString stringWithFormat:@"bytes=%ld-%ld",(unsigned long)_downLoadingOffset, (unsigned long)self.videoLength - 1] forHTTPHeaderField:@"Range"];
     
