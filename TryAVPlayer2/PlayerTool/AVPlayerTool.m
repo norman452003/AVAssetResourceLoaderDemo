@@ -41,7 +41,7 @@
     NSString *document = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
 //    NSString *document = NSTemporaryDirectory();
 //    _videoPath = [document stringByAppendingPathComponent:self.originalURL.absoluteString.lastPathComponent];
-    _videoPath = [document stringByAppendingPathComponent:@"temp.mp4"];
+    _videoPath = [document stringByAppendingPathComponent:self.originalURL.absoluteString.lastPathComponent];
     
 }
 
@@ -71,7 +71,7 @@
     }
     
     if (!self.task) {
-        self.task = [[GXVideoPlayerTask alloc] init];
+        self.task = [[GXVideoPlayerTask alloc] initWithURL:_originalURL];
         self.task.delegate = self;
         [self.task setUrl:self.originalURL offset:0];
     } else {

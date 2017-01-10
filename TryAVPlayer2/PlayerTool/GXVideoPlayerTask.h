@@ -21,6 +21,7 @@
 
 @property (nonatomic, weak) id <GXVideoPlayerTaskDelegate> delegate;
 
+- (instancetype)initWithURL:(NSURL *)url;
 
 - (void)setUrl:(NSURL *)url offset:(NSUInteger)offset;
 

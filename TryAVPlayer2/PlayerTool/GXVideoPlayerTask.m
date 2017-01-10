@@ -28,13 +28,13 @@
 @end
 
 @implementation GXVideoPlayerTask
-- (instancetype)init
+- (instancetype)initWithURL:(NSURL *)url
 {
     self = [super init];
     if (self) {
         _taskArr = [NSMutableArray array];
         NSString *document = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
-        _tempPath =  [document stringByAppendingPathComponent:@"temp.mp4"];
+        _tempPath =  [document stringByAppendingPathComponent:url.absoluteString.lastPathComponent];
         if ([[NSFileManager defaultManager] fileExistsAtPath:_tempPath]) {
             [[NSFileManager defaultManager] removeItemAtPath:_tempPath error:nil];
             [[NSFileManager defaultManager] createFileAtPath:_tempPath contents:nil attributes:nil];
@@ -141,16 +141,16 @@
         _isFinishLoad = YES;
         
         //这里自己写需要保存数据的路径
-        NSString *document = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
+//        NSString *document = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
 //        NSString *cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"GX"];
-        NSString *cachePath = [document stringByAppendingPathComponent:@"保持数据.mp4"];
+//        NSString *cachePath = [document stringByAppendingPathComponent:@"保持数据.mp4"];
         
-        BOOL isSuccess = [[NSFileManager defaultManager] copyItemAtPath:_tempPath toPath:cachePath error:nil];
-        if (isSuccess) {
-            NSLog(@"rename success");
-        }else{
-            NSLog(@"rename fail");
-        }
+//        BOOL isSuccess = [[NSFileManager defaultManager] copyItemAtPath:_tempPath toPath:cachePath error:nil];
+//        if (isSuccess) {
+//            NSLog(@"rename success");
+//        }else{
+//            NSLog(@"rename fail");
+//        }
     }
     
     if ([self.delegate respondsToSelector:@selector(didFinishLoadingWithTask:)]) {
