@@ -77,12 +77,10 @@
 
 - (void)cancel{
     [self.connection cancel];
-    
 }
 
 
 #pragma mark -  NSURLConnection Delegate Methods
-
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response{
     _isFinishLoad = NO;
@@ -119,10 +117,7 @@
     
     [self.taskArr addObject:connection];
     
-    
     self.fileHandle = [NSFileHandle fileHandleForWritingAtPath:_tempPath];
-    
-    
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data{

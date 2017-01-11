@@ -35,8 +35,9 @@
 
 @protocol GXVideoPlayerTaskDelegate <NSObject>
 
-- (void)task:(GXVideoPlayerTask *)task didReceiveVideoLength:(NSUInteger)ideoLength mimeType:(NSString *)mimeType;
 - (void)didReceiveVideoDataWithTask:(GXVideoPlayerTask *)task;
+@optional
+- (void)task:(GXVideoPlayerTask *)task didReceiveVideoLength:(NSUInteger)ideoLength mimeType:(NSString *)mimeType;
 - (void)didFinishLoadingWithTask:(GXVideoPlayerTask *)task;
 - (void)didFailLoadingWithTask:(GXVideoPlayerTask *)task WithError:(NSInteger )errorCode;
 
