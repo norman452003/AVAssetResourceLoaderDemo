@@ -181,12 +181,14 @@
         startOffset = dataRequest.currentOffset;
     }
     
+    //如果下载的长度还打不到dataRequest需要的 返回  不拼接
     if ((self.task.offset +self.task.downLoadingOffset) < startOffset)
     {
         //NSLog(@"NO DATA FOR REQUEST");
         return NO;
     }
     
+    //如果起始位置小于请求的开始位置 这时候肯定拼不了数据 因为需要的前面部分没下。。。
     if (startOffset < self.task.offset) {
         return NO;
     }
