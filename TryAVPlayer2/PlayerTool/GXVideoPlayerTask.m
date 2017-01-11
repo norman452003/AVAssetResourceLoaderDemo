@@ -7,6 +7,7 @@
 //
 
 #import "GXVideoPlayerTask.h"
+#import <MobileCoreServices/MobileCoreServices.h>
 
 @interface GXVideoPlayerTask ()
 
@@ -74,8 +75,6 @@
     
 }
 
-
-
 - (void)cancel{
     [self.connection cancel];
     
@@ -102,10 +101,17 @@
     } else {
         videoLength = [length integerValue];
     }
-    
     self.videoLength = videoLength;
-    self.mimeType = @"video/mp4";
+    self.mimeType = httpResponse.MIMEType;
     
+    NSString *mimeType = response.MIMEType;
+    CFStringRef contentType = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (__bridge CFStringRef)(mimeType), NULL);
+    NSString *contentInfo = CFBridgingRelease(contentType);
+    
+    NSDictionary *dict = @{@"length" : @(videoLength),@"type" : contentInfo};
+    NSString *document = NSTemporaryDirectory();
+    NSString *cachePath =  [[[document stringByAppendingPathComponent:_url.absoluteString.lastPathComponent] stringByDeletingPathExtension] stringByAppendingString:@"info"];
+    [dict writeToFile:cachePath atomically:YES];
     
     if ([self.delegate respondsToSelector:@selector(task:didReceiveVideoLength:mimeType:)]) {
         [self.delegate task:self didReceiveVideoLength:self.videoLength mimeType:self.mimeType];

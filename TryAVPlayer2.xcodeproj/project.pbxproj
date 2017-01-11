@@ -16,6 +16,7 @@
 		D286A3521E2483CB0044A2D9 /* AVPlayerTool.m in Sources */ = {isa = PBXBuildFile; fileRef = D286A3511E2483CB0044A2D9 /* AVPlayerTool.m */; };
 		D286A3551E24873A0044A2D9 /* GXVideoPlayerTask.m in Sources */ = {isa = PBXBuildFile; fileRef = D286A3541E24873A0044A2D9 /* GXVideoPlayerTask.m */; };
 		D286A3581E2489530044A2D9 /* GXPlayerView.m in Sources */ = {isa = PBXBuildFile; fileRef = D286A3571E2489530044A2D9 /* GXPlayerView.m */; };
+		D286A35B1E24D4590044A2D9 /* UIView+frameAdjust.m in Sources */ = {isa = PBXBuildFile; fileRef = D286A35A1E24D4590044A2D9 /* UIView+frameAdjust.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,8 @@
 		D286A3541E24873A0044A2D9 /* GXVideoPlayerTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GXVideoPlayerTask.m; sourceTree = "<group>"; };
 		D286A3561E2489530044A2D9 /* GXPlayerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GXPlayerView.h; sourceTree = "<group>"; };
 		D286A3571E2489530044A2D9 /* GXPlayerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GXPlayerView.m; sourceTree = "<group>"; };
+		D286A3591E24D4590044A2D9 /* UIView+frameAdjust.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+frameAdjust.h"; sourceTree = "<group>"; };
+		D286A35A1E24D4590044A2D9 /* UIView+frameAdjust.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+frameAdjust.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +75,8 @@
 				D286A33C1E2482270044A2D9 /* AppDelegate.m */,
 				D286A33E1E2482270044A2D9 /* ViewController.h */,
 				D286A33F1E2482270044A2D9 /* ViewController.m */,
+				D286A3591E24D4590044A2D9 /* UIView+frameAdjust.h */,
+				D286A35A1E24D4590044A2D9 /* UIView+frameAdjust.m */,
 				D286A3411E2482270044A2D9 /* Main.storyboard */,
 				D286A3441E2482270044A2D9 /* Assets.xcassets */,
 				D286A3461E2482270044A2D9 /* LaunchScreen.storyboard */,
@@ -174,6 +179,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D286A3551E24873A0044A2D9 /* GXVideoPlayerTask.m in Sources */,
+				D286A35B1E24D4590044A2D9 /* UIView+frameAdjust.m in Sources */,
 				D286A3401E2482270044A2D9 /* ViewController.m in Sources */,
 				D286A33D1E2482270044A2D9 /* AppDelegate.m in Sources */,
 				D286A33A1E2482270044A2D9 /* main.m in Sources */,

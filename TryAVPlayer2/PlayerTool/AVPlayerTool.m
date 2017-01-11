@@ -19,6 +19,10 @@
 @property (nonatomic, copy  ) NSString       *videoPath;
 @property (nonatomic, strong) GXVideoPlayerTask *task;
 @property (nonatomic, strong) AVPlayerItem *item;
+@property (nonatomic, assign) BOOL hasCache;
+@property (nonatomic, strong) NSDictionary *infoDict;
+@property (nonatomic, strong) NSData *cacheData;
+
 
 @end
 
@@ -37,14 +41,23 @@
     
     self.pendingArray = [NSMutableArray array];
     self.originalURL = url;
+    NSString *document = NSTemporaryDirectory();
+    _videoPath = [document stringByAppendingPathComponent:self.originalURL.absoluteString.lastPathComponent];
     self.schemeURL = [self addSchemeToURL:url];
     AVURLAsset *asset = [AVURLAsset assetWithURL:self.schemeURL];
     [asset.resourceLoader setDelegate:self queue:dispatch_get_main_queue()];
     self.item = [AVPlayerItem playerItemWithAsset:asset];
     self.player = [AVPlayer playerWithPlayerItem:self.item];
-    NSString *document = NSTemporaryDirectory();
-    _videoPath = [document stringByAppendingPathComponent:self.originalURL.absoluteString.lastPathComponent];
     [self.item addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:NULL];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:_videoPath]) {
+        NSString *infoCache = [[[NSTemporaryDirectory() stringByAppendingPathComponent:url.absoluteString.lastPathComponent] stringByDeletingPathExtension] stringByAppendingString:@"info"];
+        self.infoDict = [[NSDictionary alloc] initWithContentsOfFile:infoCache];
+        self.cacheData = [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:_videoPath] options:NSDataReadingMappedIfSafe error:nil];
+        long resourceLength = [self.infoDict[@"length"] longValue];
+        if (resourceLength == self.cacheData.length) {
+            self.hasCache = YES;
+        }
+    }
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
@@ -68,6 +81,18 @@
 
 #pragma mark - resourceLoaderDelegate
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest{
+    if (self.hasCache) {
+        loadingRequest.contentInformationRequest.contentLength = [[self.infoDict valueForKey:@"length"] longLongValue];
+        loadingRequest.contentInformationRequest.contentType = [self.infoDict valueForKey:@"type"];
+        loadingRequest.contentInformationRequest.byteRangeAccessSupported = YES;
+        
+        NSRange range = NSMakeRange(loadingRequest.dataRequest.currentOffset, loadingRequest.dataRequest.requestedLength);
+        NSData *subData = [self.cacheData subdataWithRange:range];
+        [loadingRequest.dataRequest respondWithData:subData];
+        [loadingRequest finishLoading];
+        
+        return YES;
+    }
     [self.pendingArray addObject:loadingRequest];
     [self dealWithLoadingRequest:loadingRequest];
     return YES;
@@ -122,6 +147,9 @@
 
 - (void)fillInContentInformation:(AVAssetResourceLoadingContentInformationRequest *)contentInformationRequest
 {
+    if (self.hasCache) {
+        return;
+    }
     NSString *mimeType = self.task.mimeType;
     CFStringRef contentType = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (__bridge CFStringRef)(mimeType), NULL);
     contentInformationRequest.byteRangeAccessSupported = YES;
@@ -154,7 +182,6 @@
     
     // Respond with whatever is available if we can't satisfy the request fully yet
     NSUInteger numberOfBytesToRespondWith = MIN((NSUInteger)dataRequest.requestedLength, unreadBytes);
-    
     
     [dataRequest respondWithData:[filedata subdataWithRange:NSMakeRange((NSUInteger)startOffset- self.task.offset, (NSUInteger)numberOfBytesToRespondWith)]];
 
