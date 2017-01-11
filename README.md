@@ -1,0 +1,1 @@
+# avassetResourceLoaderDemo利用AVAssetResourceLoader类完成音视频的边播放边缓存。参考TBPlayer。
