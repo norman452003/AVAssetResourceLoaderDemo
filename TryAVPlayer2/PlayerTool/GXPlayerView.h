@@ -13,4 +13,11 @@
 
 - (void)setPlayer:(AVPlayer *)player;
 
+- (void)setLoaderProgress:(CGFloat)progress;
+- (void)setPlayProgress:(CGFloat)progress;
+
+
+@property (nonatomic, copy) void (^dragBegin)();
+@property (nonatomic, copy) void (^dragEnd)(CGFloat value);
+
 @end

@@ -16,6 +16,10 @@
 
 - (void)playWithURL:(NSURL *)url;
 
+- (void)pause;
+- (void)seekToPlayValue:(CGFloat)value;
 
+@property (nonatomic, copy) void (^resourceLoadProgress)(CGFloat progress);
+@property (nonatomic, copy) void (^resourcePlayProgress)(CGFloat progress);
 
 @end

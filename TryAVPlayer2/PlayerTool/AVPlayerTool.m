@@ -28,6 +28,9 @@
 
 @implementation AVPlayerTool
 
+
+#pragma mark - public method
+
 + (instancetype)sharedPlayerTool{
     static AVPlayerTool *tool;
     static dispatch_once_t onceToken;
@@ -49,27 +52,46 @@
     self.item = [AVPlayerItem playerItemWithAsset:asset];
     self.player = [AVPlayer playerWithPlayerItem:self.item];
     [self.item addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:NULL];
-    if ([[NSFileManager defaultManager] fileExistsAtPath:_videoPath]) {
-        NSString *infoCache = [[[NSTemporaryDirectory() stringByAppendingPathComponent:url.absoluteString.lastPathComponent] stringByDeletingPathExtension] stringByAppendingString:@"info"];
-        self.infoDict = [[NSDictionary alloc] initWithContentsOfFile:infoCache];
-        self.cacheData = [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:_videoPath] options:NSDataReadingMappedIfSafe error:nil];
-        long resourceLength = [self.infoDict[@"length"] longValue];
-        if (resourceLength == self.cacheData.length) {
-            self.hasCache = YES;
+    [self.item addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionNew context:NULL];
+    
+    __weak typeof(self) weakSelf = self;
+    [self.player addPeriodicTimeObserverForInterval:CMTimeMake(1, 1) queue:dispatch_get_main_queue() usingBlock:^(CMTime time) {
+        if (weakSelf.resourcePlayProgress) {
+            CGFloat current = CMTimeGetSeconds(time);
+            CGFloat duration = CMTimeGetSeconds(weakSelf.item.duration);
+            weakSelf.resourcePlayProgress(current/duration);
         }
-    }
+    }];
+    
+    [self checkLocalCache];
+}
+
+- (void)pause{
+    [self.player pause];
+}
+
+- (void)seekToPlayValue:(CGFloat)value{
+    CMTime duration = self.item.duration;
+    CMTime time = CMTimeMake(value * duration.value, duration.timescale);
+    __weak typeof(self) weakSelf = self;
+    [self.player seekToTime:time completionHandler:^(BOOL finished) {
+        if (finished) {
+            [weakSelf.player play];
+        }
+    }];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
-    if (object == self.item) {
+    if (object == self.item && [keyPath isEqualToString:@"status"]) {
         if (self.item.status == AVPlayerItemStatusReadyToPlay) {
             NSLog(@"ready to play");
             [self.player play];
         }else{
-            
             NSLog(@"pause");
             [self.player pause];
         }
+    }else if (object == self.item && [keyPath isEqualToString:@"loadedTimeRanges"]){
+        [self dealWithPlayerItemProgress];
     }
 }
 
@@ -99,14 +121,12 @@
 }
 
 - (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest{
-//    NSLog(@"loadingRequestCancel ===== %lld",loadingRequest.dataRequest.currentOffset);
     [self.pendingArray removeObject:loadingRequest];
 }
 
 - (void)dealWithLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest{
     
     NSRange range = NSMakeRange((NSUInteger)loadingRequest.dataRequest.currentOffset, NSUIntegerMax);
-//    NSLog(@"dealWithRequest downloadingOffset = %ld",self.task.downLoadingOffset);
     if (self.task.downLoadingOffset > 0) {
         [self processPendingRequests];
     }
@@ -197,6 +217,35 @@
 
 - (void)didFinishLoadingWithTask:(GXVideoPlayerTask *)task{
 
+}
+
+
+- (void)dealWithPlayerItemProgress{
+    NSArray *timeRanges = [self.item loadedTimeRanges];
+    if (!timeRanges.count) {
+        return;
+    }
+    CMTimeRange timeRange = [timeRanges.firstObject CMTimeRangeValue];
+    float startTime = CMTimeGetSeconds(timeRange.start);
+    float durationTime = CMTimeGetSeconds(timeRange.duration);
+    NSTimeInterval timeRangeInterval = startTime + durationTime;
+    float totalDuration = CMTimeGetSeconds(self.item.duration);
+    float loadItemProgress = timeRangeInterval/totalDuration;
+    if (self.resourceLoadProgress) {
+        self.resourceLoadProgress(loadItemProgress);
+    }
+}
+
+- (void)checkLocalCache{
+    if ([[NSFileManager defaultManager] fileExistsAtPath:_videoPath]) {
+        NSString *infoCache = [[[NSTemporaryDirectory() stringByAppendingPathComponent:self.originalURL.absoluteString.lastPathComponent] stringByDeletingPathExtension] stringByAppendingString:@"info"];
+        self.infoDict = [[NSDictionary alloc] initWithContentsOfFile:infoCache];
+        self.cacheData = [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:_videoPath] options:NSDataReadingMappedIfSafe error:nil];
+        long resourceLength = [self.infoDict[@"length"] longValue];
+        if (resourceLength == self.cacheData.length) {
+            self.hasCache = YES;
+        }
+    }
 }
 
 @end

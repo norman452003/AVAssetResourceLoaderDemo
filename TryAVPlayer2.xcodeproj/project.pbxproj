@@ -138,6 +138,7 @@
 				TargetAttributes = {
 					D286A3341E2482270044A2D9 = {
 						CreatedOnToolsVersion = 8.1;
+						DevelopmentTeam = G3Z6RDVK48;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -304,6 +305,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = G3Z6RDVK48;
 				INFOPLIST_FILE = TryAVPlayer2/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = ah.TryAVPlayer2;
@@ -315,6 +317,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = G3Z6RDVK48;
 				INFOPLIST_FILE = TryAVPlayer2/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = ah.TryAVPlayer2;
@@ -341,6 +344,7 @@
 				D286A34E1E2482270044A2D9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
