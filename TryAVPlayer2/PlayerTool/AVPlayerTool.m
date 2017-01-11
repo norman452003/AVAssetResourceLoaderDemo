@@ -100,6 +100,7 @@
 
 #pragma mark - resourceLoaderDelegate
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest{
+//    NSLog(@"loadingRequest == %@",loadingRequest);
     if (self.hasCache) {
         loadingRequest.contentInformationRequest.contentLength = [[self.infoDict valueForKey:@"length"] longLongValue];
         loadingRequest.contentInformationRequest.contentType = [self.infoDict valueForKey:@"type"];
@@ -173,7 +174,7 @@
 
 - (BOOL)respondWithDataForRequest:(AVAssetResourceLoadingDataRequest *)dataRequest{
     
-    NSLog(@"curentOffset = %lld  requestedOffset = %lld",dataRequest.currentOffset,dataRequest.requestedOffset);
+//    NSLog(@"curentOffset = %lld  requestedOffset = %lld",dataRequest.currentOffset,dataRequest.requestedOffset);
     long long startOffset = dataRequest.requestedOffset;
     
     if (dataRequest.currentOffset != 0) {
@@ -193,16 +194,17 @@
     NSData *filedata = [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:_videoPath] options:NSDataReadingMappedIfSafe error:nil];
     
     // This is the total data we have from startOffset to whatever has been downloaded so far
+    //下载的总数据  - （已经拼接的数据 - 设置的起始下载位置）
     NSUInteger unreadBytes = self.task.downLoadingOffset - ((NSInteger)startOffset - self.task.offset);
     
     // Respond with whatever is available if we can't satisfy the request fully yet
     NSUInteger numberOfBytesToRespondWith = MIN((NSUInteger)dataRequest.requestedLength, unreadBytes);
-    
+//    NSLog(@"length = %ld   unreadBytes = %ld",numberOfBytesToRespondWith,unreadBytes);
     [dataRequest respondWithData:[filedata subdataWithRange:NSMakeRange((NSUInteger)startOffset- self.task.offset, (NSUInteger)numberOfBytesToRespondWith)]];
     
     long long endOffset = startOffset + dataRequest.requestedLength;
     BOOL didRespondFully = (self.task.offset + self.task.downLoadingOffset) >= endOffset;
-    NSLog(@"currentOffset = %ld endOffset = %lld",(long)dataRequest.requestedLength,startOffset);
+//    NSLog(@"requestedLength = %ld endOffset = %lld",(long)dataRequest.requestedLength,startOffset);
     return didRespondFully;
 }
 

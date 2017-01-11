@@ -131,8 +131,6 @@
     if ([self.delegate respondsToSelector:@selector(didReceiveVideoDataWithTask:)]) {
         [self.delegate didReceiveVideoDataWithTask:self];
     }
-    
-    
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection{
@@ -167,10 +165,9 @@
 }
 
 
-- (void)continueLoading
-{
-    _once = YES;
+- (void)continueLoading{
     
+    _once = YES;
     
     NSURLComponents *actualURLComponents = [[NSURLComponents alloc] initWithURL:_url resolvingAgainstBaseURL:NO];
     actualURLComponents.scheme = @"http";
@@ -185,14 +182,11 @@
     [self.connection start];
 }
 
-- (void)clearData
-{
+- (void)clearData{
+    
     [self.connection cancel];
     //移除文件
     [[NSFileManager defaultManager] removeItemAtPath:_tempPath error:nil];
-    
-    
-    
 }
 
 @end
