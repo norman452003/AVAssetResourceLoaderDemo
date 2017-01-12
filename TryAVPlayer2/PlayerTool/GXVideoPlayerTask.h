@@ -14,7 +14,7 @@
 @property (nonatomic, strong, readonly) NSURL *url;
 @property (nonatomic, readonly) NSUInteger offset;
 
-@property (nonatomic, readonly) NSUInteger videoLength;
+@property (nonatomic) NSUInteger videoLength;
 @property (nonatomic, readonly) NSUInteger downLoadingOffset;
 @property (nonatomic, strong, readonly) NSString* mimeType;
 @property (nonatomic, assign) BOOL isFinishLoad;

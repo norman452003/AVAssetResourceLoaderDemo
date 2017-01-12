@@ -14,7 +14,7 @@
 @property (nonatomic, strong) NSURL *url;
 @property (nonatomic) NSUInteger offset;
 
-@property (nonatomic) NSUInteger videoLength;
+//@property (nonatomic) NSUInteger videoLength;
 @property (nonatomic, strong) NSString *mimeType;
 
 @property (nonatomic, strong) NSURLConnection *connection;
@@ -35,11 +35,11 @@
         _taskArr = [NSMutableArray array];
         NSString *document = NSTemporaryDirectory();
         _tempPath =  [document stringByAppendingPathComponent:url.absoluteString.lastPathComponent];
-        if ([[NSFileManager defaultManager] fileExistsAtPath:_tempPath]) {
-            [[NSFileManager defaultManager] removeItemAtPath:_tempPath error:nil];
-            [[NSFileManager defaultManager] createFileAtPath:_tempPath contents:nil attributes:nil];
-            
-        } else {
+        if (![[NSFileManager defaultManager] fileExistsAtPath:_tempPath]) {
+//            [[NSFileManager defaultManager] removeItemAtPath:_tempPath error:nil];
+//            [[NSFileManager defaultManager] createFileAtPath:_tempPath contents:nil attributes:nil];
+//            
+//        } else {
             [[NSFileManager defaultManager] createFileAtPath:_tempPath contents:nil attributes:nil];
         }
         

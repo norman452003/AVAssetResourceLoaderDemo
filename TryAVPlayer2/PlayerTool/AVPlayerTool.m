@@ -19,8 +19,11 @@
 @property (nonatomic, strong) GXVideoPlayerTask *task;
 @property (nonatomic, strong) AVPlayerItem *item;
 @property (nonatomic, assign) BOOL hasCache;
+@property (nonatomic, assign) BOOL cacheComplete;
+
 @property (nonatomic, strong) NSDictionary *infoDict;
 @property (nonatomic, strong) NSFileHandle *readHandle;
+
 
 @end
 
@@ -100,8 +103,7 @@
 
 #pragma mark - resourceLoaderDelegate
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest{
-//    NSLog(@"loadingRequest == %@",loadingRequest);
-    if (self.hasCache) {
+    if (self.cacheComplete) {
         loadingRequest.contentInformationRequest.contentLength = [[self.infoDict valueForKey:@"length"] longLongValue];
         loadingRequest.contentInformationRequest.contentType = [self.infoDict valueForKey:@"type"];
         loadingRequest.contentInformationRequest.byteRangeAccessSupported = YES;
@@ -111,9 +113,44 @@
         NSData *data = [self.readHandle readDataOfLength:range.length];
         [loadingRequest.dataRequest respondWithData:data];
         [loadingRequest finishLoading];
+        if (loadingRequest.dataRequest.requestedLength == [[self.infoDict valueForKey:@"length"] longLongValue]) {
+            [self.readHandle closeFile];
+        }
         
         return YES;
     }
+    
+    if (self.hasCache) {
+        loadingRequest.contentInformationRequest.contentLength = [[self.infoDict valueForKey:@"length"] longLongValue];
+        loadingRequest.contentInformationRequest.contentType = [self.infoDict valueForKey:@"type"];
+        loadingRequest.contentInformationRequest.byteRangeAccessSupported = YES;
+        
+        NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:_videoPath error:NULL];
+        long localFileSize = [attributes[NSFileSize] longValue];
+        if (localFileSize > loadingRequest.dataRequest.requestedLength) {
+            NSRange range = NSMakeRange(loadingRequest.dataRequest.currentOffset, loadingRequest.dataRequest.requestedLength);
+            [self.readHandle seekToFileOffset:range.location];
+            NSData *data = [self.readHandle readDataOfLength:range.length];
+            [loadingRequest.dataRequest respondWithData:data];
+            [loadingRequest finishLoading];
+        }else{
+            [self.pendingArray addObject:loadingRequest];
+            NSRange range = NSMakeRange(loadingRequest.dataRequest.currentOffset, localFileSize);
+            [self.readHandle seekToFileOffset:range.location];
+            NSData *data = [self.readHandle readDataOfLength:range.length];
+            [loadingRequest.dataRequest respondWithData:data];
+            if (!self.task) {
+                [self.readHandle closeFile];
+                self.task = [[GXVideoPlayerTask alloc] initWithURL:self.schemeURL];
+                self.task.delegate = self;
+                self.task.videoLength = [[self.infoDict valueForKey:@"length"] longLongValue];
+                [self.task setUrl:self.schemeURL offset:localFileSize];
+            }
+        }
+        
+        return YES;
+    }
+    
     [self.pendingArray addObject:loadingRequest];
     [self dealWithLoadingRequest:loadingRequest];
     return YES;
@@ -181,7 +218,7 @@
         startOffset = dataRequest.currentOffset;
     }
     
-    //如果下载的长度还打不到dataRequest需要的 返回  不拼接
+    //如果下载的长度还打不到dataRequest需要的起始位置 返回  不拼接
     if ((self.task.offset +self.task.downLoadingOffset) < startOffset)
     {
         //NSLog(@"NO DATA FOR REQUEST");
@@ -202,7 +239,11 @@
     // Respond with whatever is available if we can't satisfy the request fully yet
     NSUInteger numberOfBytesToRespondWith = MIN((NSUInteger)dataRequest.requestedLength, unreadBytes);
 //    NSLog(@"length = %ld   unreadBytes = %ld",numberOfBytesToRespondWith,unreadBytes);
-    [dataRequest respondWithData:[filedata subdataWithRange:NSMakeRange((NSUInteger)startOffset- self.task.offset, (NSUInteger)numberOfBytesToRespondWith)]];
+    if (self.hasCache) {
+        [dataRequest respondWithData:[filedata subdataWithRange:NSMakeRange(startOffset, numberOfBytesToRespondWith)]];
+    }else{
+        [dataRequest respondWithData:[filedata subdataWithRange:NSMakeRange((NSUInteger)startOffset- self.task.offset, (NSUInteger)numberOfBytesToRespondWith)]];
+    }
     
     long long endOffset = startOffset + dataRequest.requestedLength;
     BOOL didRespondFully = (self.task.offset + self.task.downLoadingOffset) >= endOffset;
@@ -241,12 +282,16 @@
         NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:_videoPath error:NULL];
         long localFileSize = [attributes[NSFileSize] longValue];
         long resourceLength = [self.infoDict[@"length"] longValue];
-        if (resourceLength == localFileSize) {
+        self.readHandle = [NSFileHandle fileHandleForReadingFromURL:[NSURL URLWithString:_videoPath] error:NULL];
+        if (!self.readHandle) {
+            NSLog(@"error readHandle is nil");
+        }
+        if (resourceLength > 0) {
             self.hasCache = YES;
-            self.readHandle = [NSFileHandle fileHandleForReadingFromURL:[NSURL URLWithString:_videoPath] error:NULL];
-            if (!self.readHandle) {
-                NSLog(@"error readHandle is nil");
-            }
+        }
+        if (resourceLength == localFileSize) {
+//            self.hasCache = YES;
+            self.cacheComplete = YES;
         }
     }
 }
