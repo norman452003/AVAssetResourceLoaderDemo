@@ -15,7 +15,7 @@
 @property (nonatomic, strong) NSURL *schemeURL;
 
 @property (nonatomic, strong) NSMutableArray *pendingArray;
-@property (nonatomic, copy  ) NSString       *videoPath;
+@property (nonatomic, copy  ) NSString *videoPath;
 @property (nonatomic, strong) GXVideoPlayerTask *task;
 @property (nonatomic, strong) AVPlayerItem *item;
 @property (nonatomic, assign) BOOL hasCache;
@@ -51,6 +51,9 @@
     [asset.resourceLoader setDelegate:self queue:dispatch_get_main_queue()];
     self.item = [AVPlayerItem playerItemWithAsset:asset];
     self.player = [AVPlayer playerWithPlayerItem:self.item];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(timeJump:) name:AVPlayerItemTimeJumpedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playEnd) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
     [self.item addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:NULL];
     [self.item addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionNew context:NULL];
     
@@ -93,6 +96,16 @@
     }else if (object == self.item && [keyPath isEqualToString:@"loadedTimeRanges"]){
         [self dealWithPlayerItemProgress];
     }
+}
+
+- (void)timeJump:(NSNotification *)note{
+    if (self.item.status == AVPlayerItemStatusReadyToPlay) {
+        NSLog(@"start play");
+    }
+}
+
+- (void)playEnd{
+    NSLog(@"play end");
 }
 
 - (NSURL *)addSchemeToURL:(NSURL *)url{
