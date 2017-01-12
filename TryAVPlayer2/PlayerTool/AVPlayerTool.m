@@ -103,54 +103,21 @@
 
 #pragma mark - resourceLoaderDelegate
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest{
+    
+    //处理本地缓存资源完整情况
     if (self.cacheComplete) {
-        loadingRequest.contentInformationRequest.contentLength = [[self.infoDict valueForKey:@"length"] longLongValue];
-        loadingRequest.contentInformationRequest.contentType = [self.infoDict valueForKey:@"type"];
-        loadingRequest.contentInformationRequest.byteRangeAccessSupported = YES;
         
-        NSRange range = NSMakeRange(loadingRequest.dataRequest.currentOffset, loadingRequest.dataRequest.requestedLength);
-        [self.readHandle seekToFileOffset:range.location];
-        NSData *data = [self.readHandle readDataOfLength:range.length];
-        [loadingRequest.dataRequest respondWithData:data];
-        [loadingRequest finishLoading];
-        if (loadingRequest.dataRequest.requestedLength == [[self.infoDict valueForKey:@"length"] longLongValue]) {
-            [self.readHandle closeFile];
-        }
-        
+        [self dealWithLocalResourceCompleteSituationWithLoadingRequest:loadingRequest];
         return YES;
     }
     
+    //处理本地缓存资源不完整情况
     if (self.hasCache) {
-        loadingRequest.contentInformationRequest.contentLength = [[self.infoDict valueForKey:@"length"] longLongValue];
-        loadingRequest.contentInformationRequest.contentType = [self.infoDict valueForKey:@"type"];
-        loadingRequest.contentInformationRequest.byteRangeAccessSupported = YES;
-        
-        NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:_videoPath error:NULL];
-        long localFileSize = [attributes[NSFileSize] longValue];
-        if (localFileSize > loadingRequest.dataRequest.requestedLength) {
-            NSRange range = NSMakeRange(loadingRequest.dataRequest.currentOffset, loadingRequest.dataRequest.requestedLength);
-            [self.readHandle seekToFileOffset:range.location];
-            NSData *data = [self.readHandle readDataOfLength:range.length];
-            [loadingRequest.dataRequest respondWithData:data];
-            [loadingRequest finishLoading];
-        }else{
-            [self.pendingArray addObject:loadingRequest];
-            NSRange range = NSMakeRange(loadingRequest.dataRequest.currentOffset, localFileSize);
-            [self.readHandle seekToFileOffset:range.location];
-            NSData *data = [self.readHandle readDataOfLength:range.length];
-            [loadingRequest.dataRequest respondWithData:data];
-            if (!self.task) {
-                [self.readHandle closeFile];
-                self.task = [[GXVideoPlayerTask alloc] initWithURL:self.schemeURL];
-                self.task.delegate = self;
-                self.task.videoLength = [[self.infoDict valueForKey:@"length"] longLongValue];
-                [self.task setUrl:self.schemeURL offset:localFileSize];
-            }
-        }
-        
+        [self dealWithLocalResourceNotCompleteSituationWithLoadingRequest:loadingRequest];
         return YES;
     }
     
+    //本地无缓存情况
     [self.pendingArray addObject:loadingRequest];
     [self dealWithLoadingRequest:loadingRequest];
     return YES;
@@ -179,6 +146,51 @@
             [self.task setUrl:self.schemeURL offset:range.location];
         }
     }
+}
+
+- (void)dealWithLocalResourceCompleteSituationWithLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest{
+    loadingRequest.contentInformationRequest.contentLength = [[self.infoDict valueForKey:@"length"] longLongValue];
+    loadingRequest.contentInformationRequest.contentType = [self.infoDict valueForKey:@"type"];
+    loadingRequest.contentInformationRequest.byteRangeAccessSupported = YES;
+    
+    NSRange range = NSMakeRange(loadingRequest.dataRequest.currentOffset, loadingRequest.dataRequest.requestedLength);
+    [self.readHandle seekToFileOffset:range.location];
+    NSData *data = [self.readHandle readDataOfLength:range.length];
+    [loadingRequest.dataRequest respondWithData:data];
+    [loadingRequest finishLoading];
+    if (loadingRequest.dataRequest.requestedLength == [[self.infoDict valueForKey:@"length"] longLongValue]) {
+        [self.readHandle closeFile];
+    }
+}
+
+- (void)dealWithLocalResourceNotCompleteSituationWithLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest{
+    loadingRequest.contentInformationRequest.contentLength = [[self.infoDict valueForKey:@"length"] longLongValue];
+    loadingRequest.contentInformationRequest.contentType = [self.infoDict valueForKey:@"type"];
+    loadingRequest.contentInformationRequest.byteRangeAccessSupported = YES;
+    
+    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:_videoPath error:NULL];
+    long localFileSize = [attributes[NSFileSize] longValue];
+    if (localFileSize > loadingRequest.dataRequest.requestedLength) {
+        NSRange range = NSMakeRange(loadingRequest.dataRequest.currentOffset, loadingRequest.dataRequest.requestedLength);
+        [self.readHandle seekToFileOffset:range.location];
+        NSData *data = [self.readHandle readDataOfLength:range.length];
+        [loadingRequest.dataRequest respondWithData:data];
+        [loadingRequest finishLoading];
+    }else{
+        [self.pendingArray addObject:loadingRequest];
+        NSRange range = NSMakeRange(loadingRequest.dataRequest.currentOffset, localFileSize);
+        [self.readHandle seekToFileOffset:range.location];
+        NSData *data = [self.readHandle readDataOfLength:range.length];
+        [loadingRequest.dataRequest respondWithData:data];
+        if (!self.task) {
+            [self.readHandle closeFile];
+            self.task = [[GXVideoPlayerTask alloc] initWithURL:self.schemeURL];
+            self.task.delegate = self;
+            self.task.videoLength = [[self.infoDict valueForKey:@"length"] longLongValue];
+            [self.task setUrl:self.schemeURL offset:localFileSize];
+        }
+    }
+
 }
 
 - (void)processPendingRequests{
@@ -290,7 +302,6 @@
             self.hasCache = YES;
         }
         if (resourceLength == localFileSize) {
-//            self.hasCache = YES;
             self.cacheComplete = YES;
         }
     }

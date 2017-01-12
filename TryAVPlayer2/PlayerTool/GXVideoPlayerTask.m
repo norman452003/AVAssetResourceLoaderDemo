@@ -36,10 +36,6 @@
         NSString *document = NSTemporaryDirectory();
         _tempPath =  [document stringByAppendingPathComponent:url.absoluteString.lastPathComponent];
         if (![[NSFileManager defaultManager] fileExistsAtPath:_tempPath]) {
-//            [[NSFileManager defaultManager] removeItemAtPath:_tempPath error:nil];
-//            [[NSFileManager defaultManager] createFileAtPath:_tempPath contents:nil attributes:nil];
-//            
-//        } else {
             [[NSFileManager defaultManager] createFileAtPath:_tempPath contents:nil attributes:nil];
         }
         

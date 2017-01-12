@@ -1,1 +1,1 @@
-# avassetResourceLoaderDemo利用AVAssetResourceLoader类完成音视频的边播放边缓存。参考TBPlayer。
+# avassetResourceLoaderDemo利用AVAssetResourceLoader类完成音视频的边播放边缓存。参考TBPlayer。完善读取本地缓存的功能，并添加断点续传功能，当本地资源不完整的时候，只需下载未下载的部分，以节省流量。
